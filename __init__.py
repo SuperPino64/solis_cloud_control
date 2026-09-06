@@ -16,10 +16,7 @@ _LOGGER = logging.getLogger(__name__)
 _PLATFORMS: list[Platform] = [
     Platform.DATETIME,
     Platform.NUMBER,
-    Platform.SELECT,
-    Platform.SENSOR,
     Platform.SWITCH,
-    Platform.TEXT,
 ]
 
 
