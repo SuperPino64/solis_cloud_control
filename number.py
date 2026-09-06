@@ -159,7 +159,7 @@ class PowerLimit(_WritableNumber):
         super().__init__(coordinator, entity_description, inverter_power_limit.cid)
         self.inverter_power_limit = inverter_power_limit
         self._set_value_attributes(inverter_power_limit, unit=PERCENTAGE)
-        self._attr_mode = NumberMode.SLIDER
+        self._attr_mode = NumberMode.SLIDER #mod
 
     @property
     def native_value(self) -> float | None:
