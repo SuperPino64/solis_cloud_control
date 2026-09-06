@@ -1,6 +1,6 @@
 {
     "domain": "solis_cloud_control",
-    "name": "Solis Cloud Control Integration custom",
+    "name": "Solis Cloud Control Integration custom 2026",
     "codeowners": [
         "@superpino64"
     ],
@@ -8,5 +8,5 @@
     "documentation": "https://github.com/SuperPino64/solis-cloud-control_custom",
     "iot_class": "cloud_polling",
     "issue_tracker": "https://github.com/SuperPino64/solis-cloud-control_custom/issues",
-    "version": "1.0.0"
+    "version": "1.0.1"
 }
