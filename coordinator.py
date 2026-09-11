@@ -59,7 +59,7 @@ class SolisCloudControlCoordinator(DataUpdateCoordinator[SolisCloudControlData])
 
     async def _reload_integration(self) -> None:
         _LOGGER.warning(
-            "Solis device offline %s times in a row. Reloading integration.",
+            "Solis communication failed %s times in a row. Reloading integration.",
             _MAX_CONSECUTIVE_FAILURES,
         )
 
@@ -96,10 +96,9 @@ class SolisCloudControlCoordinator(DataUpdateCoordinator[SolisCloudControlData])
                 }
             )
 
-            # succes -> reset teller
             if self._failure_count > 0:
                 _LOGGER.info(
-                    "Communication restored, resetting failure counter (%s -> 0)",
+                    "Communication restored. Resetting failure counter (%s -> 0).",
                     self._failure_count,
                 )
 
@@ -110,25 +109,32 @@ class SolisCloudControlCoordinator(DataUpdateCoordinator[SolisCloudControlData])
             return data
 
         except SolisCloudControlApiError as error:
-            error_text = str(error)
+            error_text = str(error).lower()
 
-            # Alleen reageren op B0072 (device offline)
-            if (
-                "B0072" in error_text
-                or "device is offline" in error_text.lower()
-            ):
+            is_recoverable_error = any(
+                text in error_text
+                for text in (
+                    "b0072",
+                    "device is offline",
+                    "timeout",
+                    "connection",
+                    "connect",
+                )
+            )
+
+            if is_recoverable_error:
                 self._failure_count += 1
 
                 _LOGGER.warning(
-                    "Solis device offline (B0072). Failure %s/%s",
+                    "Solis communication failure %s/%s: %s",
                     self._failure_count,
                     _MAX_CONSECUTIVE_FAILURES,
+                    error,
                 )
 
                 if self._failure_count >= _MAX_CONSECUTIVE_FAILURES:
                     _LOGGER.warning(
-                        "Maximum failure count reached. "
-                        "Reloading integration."
+                        "Maximum failure count reached. Reloading integration."
                     )
 
                     self._failure_count = 0
@@ -136,9 +142,12 @@ class SolisCloudControlCoordinator(DataUpdateCoordinator[SolisCloudControlData])
                     asyncio.create_task(
                         self._reload_integration()
                     )
-
             else:
-                # andere fout -> teller resetten
+                _LOGGER.warning(
+                    "Non-recoverable Solis API error: %s",
+                    error,
+                )
+
                 self._failure_count = 0
 
             raise UpdateFailed(error) from error
