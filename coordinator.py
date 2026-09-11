@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from datetime import timedelta
 
@@ -6,7 +7,10 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.debounce import Debouncer
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
-from custom_components.solis_cloud_control.api.solis_api import SolisCloudControlApiClient, SolisCloudControlApiError
+from custom_components.solis_cloud_control.api.solis_api import (
+    SolisCloudControlApiClient,
+    SolisCloudControlApiError,
+)
 from custom_components.solis_cloud_control.inverters.inverter import Inverter
 
 _LOGGER = logging.getLogger(__name__)
@@ -19,6 +23,8 @@ _REQUEST_REFRESH_COOLDOWN_SECONDS = 10
 
 _UPDATE_BATCH_DATA_MAX_RETRY_TIME_SECONDS = 180
 _UPDATE_DATA_MAX_RETRY_TIME_SECONDS = 60
+
+_MAX_CONSECUTIVE_FAILURES = 5
 
 
 class SolisCloudControlData(dict[int, str | None]):
@@ -46,11 +52,29 @@ class SolisCloudControlCoordinator(DataUpdateCoordinator[SolisCloudControlData])
                 immediate=False,
             ),
         )
+
         self._api_client = api_client
         self._inverter = inverter
+        self._failure_count = 0
+
+    async def _reload_integration(self) -> None:
+        _LOGGER.warning(
+            "Solis device offline %s times in a row. Reloading integration.",
+            _MAX_CONSECUTIVE_FAILURES,
+        )
+
+        try:
+            await self.hass.config_entries.async_reload(
+                self.config_entry.entry_id
+            )
+        except Exception:
+            _LOGGER.exception(
+                "Failed reloading Solis Cloud Control integration"
+            )
 
     async def _async_update_data(self) -> SolisCloudControlData:
         inverter_sn = self._inverter.info.serial_number
+
         try:
             results = await self._api_client.read_batch(
                 inverter_sn,
@@ -65,10 +89,58 @@ class SolisCloudControlCoordinator(DataUpdateCoordinator[SolisCloudControlData])
                     max_retry_time=_UPDATE_DATA_MAX_RETRY_TIME_SECONDS,
                 )
 
-            data = SolisCloudControlData({cid: results.get(cid) for cid in self._inverter.all_cids})
+            data = SolisCloudControlData(
+                {
+                    cid: results.get(cid)
+                    for cid in self._inverter.all_cids
+                }
+            )
+
+            # succes -> reset teller
+            if self._failure_count > 0:
+                _LOGGER.info(
+                    "Communication restored, resetting failure counter (%s -> 0)",
+                    self._failure_count,
+                )
+
+            self._failure_count = 0
+
             _LOGGER.debug("Data read from API: %s", data)
+
             return data
+
         except SolisCloudControlApiError as error:
+            error_text = str(error)
+
+            # Alleen reageren op B0072 (device offline)
+            if (
+                "B0072" in error_text
+                or "device is offline" in error_text.lower()
+            ):
+                self._failure_count += 1
+
+                _LOGGER.warning(
+                    "Solis device offline (B0072). Failure %s/%s",
+                    self._failure_count,
+                    _MAX_CONSECUTIVE_FAILURES,
+                )
+
+                if self._failure_count >= _MAX_CONSECUTIVE_FAILURES:
+                    _LOGGER.warning(
+                        "Maximum failure count reached. "
+                        "Reloading integration."
+                    )
+
+                    self._failure_count = 0
+
+                    asyncio.create_task(
+                        self._reload_integration()
+                    )
+
+            else:
+                # andere fout -> teller resetten
+                self._failure_count = 0
+
             raise UpdateFailed(error) from error
 
     async def control(
@@ -84,6 +156,13 @@ class SolisCloudControlCoordinator(DataUpdateCoordinator[SolisCloudControlData])
 
         try:
             inverter_sn = self._inverter.info.serial_number
-            await self._api_client.control(inverter_sn, cid, value, old_value)
+
+            await self._api_client.control(
+                inverter_sn,
+                cid,
+                value,
+                old_value,
+            )
+
         finally:
             await self.async_request_refresh()
