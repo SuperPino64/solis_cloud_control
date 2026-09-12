@@ -1,9 +1,5 @@
 # Solis Cloud Control
 
-[![HACS](https://imgio/badge/HACS-Custom-orange.svg](https://hacs.xyz/)
-[![Home Assistant](https://img.shields.io/badge/Home%20Assistantvg](https://www.home-assistant.io/)
-[![License](https://img.shields.io/github/license/SuperPino64/solis_cloud_controlb Release](https://img.shields.io/github/v/release/SuperPino64l]()
-
 Control your **Solis inverter** directly from **Home Assistant** using the official **Solis Cloud API**.
 
 This integration exposes inverter controls as native Home Assistant entities, allowing you to automate charging, discharging, export limits, system settings, and other inverter functions directly from your automations and dashboards.
@@ -14,31 +10,17 @@ This integration exposes inverter controls as native Home Assistant entities, al
 
 ## Features
 
-✅ Native Home Assistant integration
-
 ✅ Solis Cloud API support
 
 ✅ Automatic inverter discovery
 
 ✅ Real-time inverter control entities
 
-✅ Battery charge/discharge management
-
 ✅ Export power limit control
 
-✅ Energy automation ready
 
-✅ HACS compatible
 
----
 
-## Screenshots
-
-_Add screenshots here_
-
-| Dashboard | Controls |
-|------------|------------|
-| docs/dashboard.png | docs/controls.png |
 
 ---
 
@@ -104,23 +86,6 @@ Solis Cloud Control
 
 ---
 
-## Getting API Credentials
-
-To use this integration you need API access to Solis Cloud.
-
-1. Log in to your Solis Cloud account.
-2. Navigate to API Management.
-3. Enable API access.
-4. Generate:
-
-- Key ID
-- Key Secret
-
-5. Use these credentials during integration setup.
-
-> Some accounts may require activation by Solis support.
-
----
 
 ## Supported Functions
 
@@ -132,41 +97,11 @@ Depending on inverter model and firmware, available entities may include:
 
 ### Numbers
 
-- Charge current
-- Discharge current
 - Export power limit
-- Grid settings
 
-### Select Entities
 
-- Energy storage mode
-- Battery operating mode
-- System options
 
-### Date & Time
 
-- Inverter clock synchronization
-
----
-
-## Example Automations
-
-### Charge Battery During Cheap Tariff
-
-```yaml
-alias: Charge Battery Cheap Energy
-trigger:
-  - platform: state
-    entity_id: binary_sensor.energy_is_cheap
-    to: "on"
-
-action:
-  - service: number.set_value
-    target:
-      entity_id: number.solis_charge_current
-    data:
-      value: 50
-```
 
 ### Reduce Export Power
 
@@ -179,21 +114,6 @@ action:
     data:
       value: 2000
 ```
-
----
-
-## Compatibility
-
-The integration supports a wide range of Solis hybrid and storage inverters.
-
-Actual available controls depend on:
-
-- Inverter model
-- Firmware version
-- Solis Cloud API permissions
-
----
-
 ## Troubleshooting
 
 ### No inverter found
