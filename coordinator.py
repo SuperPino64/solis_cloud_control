@@ -119,6 +119,10 @@ class SolisCloudControlCoordinator(DataUpdateCoordinator[SolisCloudControlData])
                     "timeout",
                     "connection",
                     "connect",
+                    "b0115",
+                    "datalogger is offline",
+                    "disconnected",
+                    "502",
                 )
             )
 
