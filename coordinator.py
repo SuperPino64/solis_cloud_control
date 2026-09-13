@@ -16,18 +16,14 @@ from custom_components.solis_cloud_control.inverters.inverter import Inverter
 _LOGGER = logging.getLogger(__name__)
 
 _COORDINATOR_NAME = "Solis Cloud Control"
-
 _UPDATE_INTERVAL = timedelta(minutes=5)
-
 _REQUEST_REFRESH_COOLDOWN_SECONDS = 10
-
 _UPDATE_BATCH_DATA_MAX_RETRY_TIME_SECONDS = 180
 _UPDATE_DATA_MAX_RETRY_TIME_SECONDS = 60
-
 _MAX_CONSECUTIVE_FAILURES = 5
 
 
-class SolisCloudControlData(dict[int, str | None]):
+class SolisCloudControlData(dict):
     pass
 
 
@@ -89,12 +85,25 @@ class SolisCloudControlCoordinator(DataUpdateCoordinator[SolisCloudControlData])
                     max_retry_time=_UPDATE_DATA_MAX_RETRY_TIME_SECONDS,
                 )
 
+            #
+            # EXTRA: inverterDetail ophalen
+            #
+            details = await self._api_client.inverter_details(
+                inverter_sn,
+                max_retry_time=_UPDATE_DATA_MAX_RETRY_TIME_SECONDS,
+            )
+
             data = SolisCloudControlData(
                 {
                     cid: results.get(cid)
                     for cid in self._inverter.all_cids
                 }
             )
+
+            #
+            # EXTRA: beschikbaar maken voor sensors
+            #
+            data["_details"] = details
 
             if self._failure_count > 0:
                 _LOGGER.info(
@@ -104,7 +113,8 @@ class SolisCloudControlCoordinator(DataUpdateCoordinator[SolisCloudControlData])
 
             self._failure_count = 0
 
-            _LOGGER.debug("Data read from API: %s", data)
+            _LOGGER.debug("CID data read from API: %s", results)
+            _LOGGER.debug("Inverter details: %s", details)
 
             return data
 
@@ -146,6 +156,7 @@ class SolisCloudControlCoordinator(DataUpdateCoordinator[SolisCloudControlData])
                     asyncio.create_task(
                         self._reload_integration()
                     )
+
             else:
                 _LOGGER.warning(
                     "Non-recoverable Solis API error: %s",
@@ -176,6 +187,5 @@ class SolisCloudControlCoordinator(DataUpdateCoordinator[SolisCloudControlData])
                 value,
                 old_value,
             )
-
         finally:
             await self.async_request_refresh()
