@@ -18,9 +18,58 @@ This integration exposes inverter controls as native Home Assistant entities, al
 
 ✅ Export power limit control
 
+✅ Inverter temperature monitoring
 
+✅ AC output power monitoring
 
+✅ Daily energy production monitoring
 
+✅ Lifetime energy production monitoring
+
+✅ Automatic retry handling for Solis Cloud API errors
+
+✅ Native Home Assistant entities
+
+### Available Entities
+
+#### Sensors
+
+| Entity | Description |
+|----------|-------------|
+| AC Output Power | Current inverter AC output power (kW) |
+| Inverter Temperature | Current inverter internal temperature (°C) |
+| Today Energy | Energy generated today |
+| Total Energy | Lifetime generated energy |
+
+#### DateTime
+
+| Entity | Description |
+|----------|-------------|
+| Inverter Time | Internal inverter clock |
+
+#### Numbers
+
+| Entity | Description |
+|----------|-------------|
+| Export Power Limit | Set inverter export power limit |
+
+#### Switches
+
+| Entity | Description |
+|----------|-------------|
+| Inverter On/Off | Enable or disable inverter output |
+
+### Polling & Update Rate
+
+The integration retrieves data from the official Solis Cloud API.
+
+Default behavior:
+
+- Polling interval: **3 minutes**
+- API timeout: **60 seconds**
+- Automatic retry handling for temporary Solis Cloud API failures (timeouts and 502 responses)
+
+> Note: Solis Cloud occasionally experiences API slowdowns or temporary gateway errors. The integration will automatically retry failed requests when possible.
 
 ---
 
@@ -31,116 +80,3 @@ This integration exposes inverter controls as native Home Assistant entities, al
 1. Open **HACS**
 2. Go to **Integrations**
 3. Click **⋮ → Custom repositories**
-4. Add:
-
-```
-https://github.com/SuperPino64/solis_cloud_control
-```
-
-5. Select **Integration**
-6. Install the integration
-7. Restart Home Assistant
-
----
-
-### Manual Installation
-
-1. Download the latest release.
-2. Copy:
-
-```
-custom_components/solis_cloud_control
-```
-
-to:
-
-```
-config/custom_components/
-```
-
-3. Restart Home Assistant.
-
----
-
-## Configuration
-
-1. Navigate to:
-
-```
-Settings → Devices & Services → Add Integration
-```
-
-2. Search for:
-
-```
-Solis Cloud Control
-```
-
-3. Enter:
-
-- API Key (Key ID)
-- API Secret (Token)
-- Select your inverter
-
-4. Finish setup.
-
----
-
-
-## Supported Functions
-
-Depending on inverter model and firmware, available entities may include:
-
-### Switches
-
-- Inverter On/Off
-
-### Numbers
-
-- Export power limit
-
-
-
-
-
-### Reduce Export Power
-
-```yaml
-alias: Limit Export
-action:
-  - service: number.set_value
-    target:
-      entity_id: number.solis_export_limit
-    data:
-      value: 2000
-```
-## Troubleshooting
-
-### No inverter found
-
-Verify:
-
-- API credentials are correct
-- API access is enabled
-- Inverter appears in Solis Cloud
-
-### Missing entities
-
-Not all inverter models expose the same controls through the API.
-
-### API errors
-
-The Solis Cloud platform occasionally experiences instability. Retry after several minutes.
-
----
-
-
-
-
-
-USE AT YOUR OWN RISK.
-
-Credit go to @mkuthan
-
-test123
-
