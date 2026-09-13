@@ -17,6 +17,7 @@ _PLATFORMS: list[Platform] = [
     Platform.DATETIME,
     Platform.NUMBER,
     Platform.SWITCH,
+    Platform.SENSOR,
 ]
 
 
