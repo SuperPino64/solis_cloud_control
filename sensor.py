@@ -80,13 +80,22 @@ class SolisAcPowerSensor(SolisCloudControlEntity, SensorEntity):
         super().__init__(coordinator, entity_description, [])
         self.entity_description = entity_description
         self._attr_native_unit_of_measurement = UnitOfPower.WATT
-
     @property
     def native_value(self):
         details = self.coordinator.data.get("_details", {})
+
         value = details.get("pac")
+
         try:
-            return float(value) if value is not None else None
+            value = float(value)
+
+            unit = details.get("pacStr")
+
+            if unit == "kW":
+                value = value * 1000
+
+            return round(value, 1)
+
         except (TypeError, ValueError):
             return None
 
