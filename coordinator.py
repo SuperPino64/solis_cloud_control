@@ -92,7 +92,7 @@ class SolisCloudControlCoordinator(DataUpdateCoordinator[SolisCloudControlData])
                 inverter_sn,
                 max_retry_time=_UPDATE_DATA_MAX_RETRY_TIME_SECONDS,
             )
-
+            _LOGGER.warning("SOLIS DETAILS RECEIVED")
             data = SolisCloudControlData(
                 {
                     cid: results.get(cid)
