@@ -40,7 +40,7 @@ class SolisCloudControlApiClient:
     _CONTROL_ENDPOINT = "/v2/api/control"
     _INVERTER_LIST_ENDPOINT = "/v1/api/inverterList"
     _INVERTER_DETAILS_ENDPOINT = "/v1/api/inverterDetail"
-    _TIMEOUT_SECONDS = 30
+    _TIMEOUT_SECONDS = 60
     _CONCURRENT_REQUESTS = 1
     _MAX_RETRY_TIME_SECONDS = 30
 
