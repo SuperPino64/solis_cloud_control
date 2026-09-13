@@ -70,7 +70,7 @@ class SolisCloudControlCoordinator(DataUpdateCoordinator[SolisCloudControlData])
 
     async def _async_update_data(self) -> SolisCloudControlData:
         inverter_sn = self._inverter.info.serial_number
-
+        _LOGGER.warning("SOLIS UPDATE RUNNING")
         try:
             results = await self._api_client.read_batch(
                 inverter_sn,
