@@ -16,7 +16,7 @@ from custom_components.solis_cloud_control.inverters.inverter import Inverter
 _LOGGER = logging.getLogger(__name__)
 
 _COORDINATOR_NAME = "Solis Cloud Control"
-_UPDATE_INTERVAL = timedelta(minutes=5)
+_UPDATE_INTERVAL = timedelta(minutes=1)
 _REQUEST_REFRESH_COOLDOWN_SECONDS = 10
 _UPDATE_BATCH_DATA_MAX_RETRY_TIME_SECONDS = 180
 _UPDATE_DATA_MAX_RETRY_TIME_SECONDS = 60
