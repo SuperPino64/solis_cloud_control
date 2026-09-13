@@ -70,7 +70,7 @@ class SolisCloudControlCoordinator(DataUpdateCoordinator[SolisCloudControlData])
 
     async def _async_update_data(self) -> SolisCloudControlData:
         inverter_sn = self._inverter.info.serial_number
-        _LOGGER.warning("SOLIS UPDATE RUNNING")
+        _LOGGER.debug("SOLIS UPDATE RUNNING")
         try:
             results = await self._api_client.read_batch(
                 inverter_sn,
@@ -92,7 +92,7 @@ class SolisCloudControlCoordinator(DataUpdateCoordinator[SolisCloudControlData])
                 inverter_sn,
                 max_retry_time=_UPDATE_DATA_MAX_RETRY_TIME_SECONDS,
             )
-            _LOGGER.warning("SOLIS DETAILS RECEIVED")
+            _LOGGER.debug("SOLIS DETAILS RECEIVED")
             data = SolisCloudControlData(
                 {
                     cid: results.get(cid)
@@ -116,6 +116,7 @@ class SolisCloudControlCoordinator(DataUpdateCoordinator[SolisCloudControlData])
             _LOGGER.debug("CID data read from API: %s", results)
             _LOGGER.debug("Inverter details: %s", details)
             self.async_set_updated_data(data)
+            _LOGGER.debug("Einde van update functie...")
             return data
 
         except SolisCloudControlApiError as error:
