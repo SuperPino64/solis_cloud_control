@@ -115,7 +115,7 @@ class SolisCloudControlCoordinator(DataUpdateCoordinator[SolisCloudControlData])
 
             _LOGGER.debug("CID data read from API: %s", results)
             _LOGGER.debug("Inverter details: %s", details)
-
+            self.async_set_updated_data(data)
             return data
 
         except SolisCloudControlApiError as error:
